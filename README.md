@@ -1,2 +1,2 @@
 # ticket
-A small full stack app witih Vue and Go 
+A small full stack app with Vue and Go 
