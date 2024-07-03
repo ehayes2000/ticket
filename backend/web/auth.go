@@ -32,6 +32,7 @@ func login(_ string, _ string) error {
 
 /*
 use owasp to set cookie + return 200 + store creds
+Use vite reverse proxy (zulip to avoid cross origin)
 */
 func loginRoute(c echo.Context) error {
 	// username := c.FormValue("username")

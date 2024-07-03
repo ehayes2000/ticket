@@ -5,9 +5,9 @@
   const API = import.meta.env.VITE_API;
   
   function restrict(_) { 
-    fetch(`${API}/restricted`, {
+    fetch(`/api/restricted`, {
       method: "GET",
-      credentials: "include",
+      credentials: "include", // drop when same origin
     }
     )
   }
@@ -17,7 +17,7 @@
       return;
     formData.append("username", username.value);
     formData.append("password", password.value);
-    fetch(`${API}/login`, {
+    fetch(`/api/login`, {
       method: "POST",
       credentials: "include",
       body: formData
