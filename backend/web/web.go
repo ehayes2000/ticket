@@ -11,7 +11,8 @@ import (
 func MakeServer() *echo.Echo {
 	var server = echo.New()
 	server.Use(middleware.CORSWithConfig(middleware.CORSConfig{ // TODO configure this only for dev mode?
-		AllowOrigins: []string{"http://localhost:5173"},
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowCredentials: true,
 	}))
 	restrictedRoutes := server.Group("")
 	unrestrictedRoutes := server.Group("")

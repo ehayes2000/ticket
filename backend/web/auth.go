@@ -14,24 +14,16 @@ import (
 
 func AttachAuthRoutes(restricted *echo.Group,
 	unrestricted *echo.Group) {
-
 	unrestricted.POST("/login", loginRoute)
-
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(jwtCustomClaims)
+			return &jwt.RegisteredClaims{}
 		},
-		SigningKey: []byte("secret"), // TODO, use a real key
+		TokenLookup: "cookie:token",
+		SigningKey:  []byte("secret"), // TODO, use a real key
 	}
 	restricted.Use(echojwt.WithConfig(config))
 	restricted.GET("/restricted", restrictedRoute)
-
-}
-
-type jwtCustomClaims struct {
-	Name   string
-	UserId string
-	jwt.RegisteredClaims
 }
 
 func login(_ string, _ string) error {
@@ -49,26 +41,26 @@ func loginRoute(c echo.Context) error {
 	// 	return echo.NewHTTPError(http.StatusUnauthorized, e) // TODO, be better
 	// }
 
-	claims := &jwtCustomClaims{
-		"test",
-		"testId",
-		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 12)),
-		},
+	claims := jwt.RegisteredClaims{
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 12)),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, e := token.SignedString([]byte("secret")) // TODO use a real key
 	if e != nil {
 		return e
 	}
-	return c.JSON(http.StatusOK, echo.Map{
-		"token": signedToken,
-	})
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = signedToken
+	cookie.Expires = time.Now().Add(time.Hour * 12)
+	cookie.Secure = false // TODO change
+	cookie.HttpOnly = true
+	c.SetCookie(cookie)
+	return c.String(http.StatusOK, "Login successful")
 }
 
 func restrictedRoute(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*jwtCustomClaims)
-	name := claims.Name
-	return c.String(http.StatusOK, "Welcome "+name+"!")
+	claims := user.Claims.(*jwt.RegisteredClaims)
+	return c.String(http.StatusOK, "Welcome "+claims.Subject+"!")
 }
