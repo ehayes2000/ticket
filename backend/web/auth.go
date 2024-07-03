@@ -35,12 +35,12 @@ use owasp to set cookie + return 200 + store creds
 Use vite reverse proxy (zulip to avoid cross origin)
 */
 func loginRoute(c echo.Context) error {
-	// username := c.FormValue("username")
-	// password := c.FormValue("password")
-	// e := login(username, password)
-	// if e != nil {
-	// 	return echo.NewHTTPError(http.StatusUnauthorized, e) // TODO, be better
-	// }
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+	e := login(username, password)
+	if e != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, e)
+	}
 
 	claims := jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 12)),
@@ -54,8 +54,9 @@ func loginRoute(c echo.Context) error {
 	cookie.Name = "token"
 	cookie.Value = signedToken
 	cookie.Expires = time.Now().Add(time.Hour * 12)
-	cookie.Secure = false // TODO change
+	cookie.Secure = true // TODO change
 	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteStrictMode
 	c.SetCookie(cookie)
 	return c.String(http.StatusOK, "Login successful")
 }
