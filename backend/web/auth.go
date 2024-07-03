@@ -38,6 +38,9 @@ func login(_ string, _ string) error {
 	return nil
 }
 
+/*
+use owasp to set cookie + return 200 + store creds
+*/
 func loginRoute(c echo.Context) error {
 	// username := c.FormValue("username")
 	// password := c.FormValue("password")
