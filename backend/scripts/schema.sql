@@ -7,7 +7,7 @@ CREATE TABLE users (
 
 CREATE TABLE events (
   id INTEGER NOT NULL PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT UNIQUE NOT NULL,
   description TEXT NOT NULL,
   venue TEXT,
   date TEXT,
@@ -32,3 +32,4 @@ CREATE TABLE tickets (
   event_id INTEGER NOT NULL REFERENCES events(id),
   seat TEXT
 );
+

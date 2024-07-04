@@ -2,27 +2,38 @@ package controller
 
 import "time"
 
-type Event struct {
-	EventKind   string
-	name        string
-	description string
-	venue       string
-	date        time.Time
+const (
+	GAME    = "GAME"
+	CONCERT = "CONCERT"
+)
+
+type Event interface {
+	GetEventKind() string
 	//thumbnail
 }
 
+type BaseEvent struct {
+	Kind        string
+	Name        string
+	Description string
+	Venue       string
+	Date        time.Time
+}
+
+func (e BaseEvent) GetEventKind() string { return e.Kind }
+
 type Concert struct {
+	BaseEvent
 	artist string
-	Event
 }
 
 type Game struct {
+	BaseEvent
 	team1 string
 	team2 string
-	Event
 }
 
 type Ticket struct {
-	event *Event
-	seat  string
+	BaseEvent
+	seat string
 }
