@@ -279,7 +279,7 @@ func (s Sqlite) getConcert(e *eventRow) (*Concert, error) {
 }
 
 func (s Sqlite) getGame(e *eventRow) (*Game, error) {
-	get := `SELECT (team1, team2) FROM games WHERE event_id=?`
+	get := `SELECT team1, team2 FROM games WHERE event_id=?`
 	type gameRow struct {
 		team1 string
 		team2 string
@@ -366,11 +366,11 @@ func (s Sqlite) AddTickets(username string, tickets Tickets) (int, error) {
 		return 0, e
 	}
 	defer tx.Rollback()
-	insertString := "INSERT INTO tickets (user_id, event_id, seat) VALUES %s"
+	insertString := "INSERT INTO tickets (user_id, event_id, seat) VALUES "
 	valueStrings := make([]string, 0, len(tickets.Seats))
 	valueArgs := make([]any, 0, len(tickets.Seats)*3)
 	for _, seat := range tickets.Seats {
-		valueStrings = append(valueStrings, "(?,?)")
+		valueStrings = append(valueStrings, "(?,?,?)")
 		valueArgs = append(valueArgs, uid, eid, seat)
 	}
 	joinedValues := strings.Join(valueStrings, ", ")
@@ -383,6 +383,9 @@ func (s Sqlite) AddTickets(username string, tickets Tickets) (int, error) {
 	n, rErr := r.RowsAffected()
 	if rErr != nil {
 		return 0, rErr
+	}
+	if cErr := tx.Commit(); cErr != nil {
+		return 0, cErr
 	}
 	return int(n), nil
 }
@@ -410,7 +413,14 @@ func (s Sqlite) RemoveTickets(username string, tickets Tickets) (int, error) {
 	joinedValues := strings.Join(valueStrings, ", ")
 	delete = strings.Join([]string{delete, joinedValues, ")"}, "")
 
-	r, err := tx.Exec(delete, []any{uid, eid, tickets.Seats}...)
+	// r, err := tx.Exec(delete, []any{uid, eid, tickets.Seats}...)
+	anySeats := make([]any, 2+len(tickets.Seats))
+	anySeats[0] = uid
+	anySeats[1] = eid
+	for i, v := range tickets.Seats {
+		anySeats[i+2] = v
+	}
+	r, err := tx.Exec(delete, anySeats...)
 	if err != nil {
 		return 0, err
 	}
@@ -418,20 +428,21 @@ func (s Sqlite) RemoveTickets(username string, tickets Tickets) (int, error) {
 	if nErr != nil {
 		return 0, nErr
 	}
+	if cErr := tx.Commit(); cErr != nil {
+		return 0, cErr
+	}
 	return int(n), nil
 }
 
 func (s Sqlite) GetTickets(username string, eventName string) (Tickets, error) {
 	event, err := s.GetEvent(eventName)
-	fmt.Println("WE LOOK FOR AN EVENT")
 	if err != nil {
-		fmt.Println("WE FOUND NO EVENT FUCK YOU")
 		return Tickets{}, err
 	}
 	get := `SELECT t.seat 
 	FROM tickets t
 	JOIN users u ON t.user_id = u.id
-	JOIN events e ON t.events_id = e.id
+	JOIN events e ON t.event_id = e.id
 	WHERE u.username = ?
 	AND e.name = ?`
 	rows, err := s.db.Query(get, username, eventName)

@@ -219,7 +219,7 @@ func TestTickets(t *testing.T) {
 	// add
 	n, e = controller.AddTickets("me", usrTickets)
 	if e != nil {
-		t.Error("unexpected error")
+		t.Error("unexpected error", e)
 	}
 	if n != len(usrTickets.Seats) {
 		t.Errorf("expected %d tickets actual %d\n", len(usrTickets.Seats), n)
@@ -230,12 +230,12 @@ func TestTickets(t *testing.T) {
 		t.Errorf("unexpected error getting tickets %s", tErr)
 	}
 	if len(myTickets.Seats) != len(usrTickets.Seats) {
-		t.Error("unexpected number of tickets retrieved")
+		t.Errorf("unexpected number of tickets retrieved %d expected %d actual", len(usrTickets.Seats), len(myTickets.Seats))
 	}
 	// remove
 	n, dErr := controller.RemoveTickets("me", Tickets{event, []string{"1trillion2", "1trillion3", "1trillionbillion"}})
 	if dErr != nil {
-		t.Error("unexpected error removing tickets")
+		t.Errorf("unexpected error removing tickets %s", dErr)
 	}
 	if n != 2 {
 		t.Errorf("unexpected number of tickets removed %d expected %d actual\n", 2, n)
