@@ -1,8 +1,8 @@
 <script setup lang="ts">
   import { formatDate } from "@/util/formatDate";
-  import { type TicketableEvent } from "@/models/Event";
+  import { type BaseEvent } from "@/models/Event";
   const props = defineProps<{
-    event: TicketableEvent
+    event: BaseEvent
   }>();
   const event = props.event
 </script>

@@ -9,31 +9,35 @@ const (
 
 type Event interface {
 	GetEventKind() string
+	GetEventId() int
 	//thumbnail
 }
 
 type BaseEvent struct {
-	Kind        string
-	Name        string
-	Description string
-	Venue       string
-	Date        time.Time
+	Id          int       `json:"id"`
+	Kind        string    `json:"kind"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Venue       string    `json:"venue"`
+	Date        time.Time `json:"date"`
 }
 
 func (e BaseEvent) GetEventKind() string { return e.Kind }
+func (e BaseEvent) GetEventId() int      { return e.Id }
 
 type Concert struct {
 	BaseEvent
-	Artist string
+	Artist string `json:"artist"`
 }
 
 type Game struct {
 	BaseEvent
-	Team1 string
-	Team2 string
+	Team1 string `json:"team1"`
+	Team2 string `json:"team2"`
 }
 
 type Tickets struct {
-	Event Event
-	Seats []string
+	UserId  int      `json:"userId"`
+	EventId int      `json:"eventId"`
+	Seats   []string `json:"seats"`
 }

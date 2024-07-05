@@ -1,5 +1,5 @@
 CREATE TABLE users (
-  id INTEGER NOT NULL PRIMARY KEY,
+  id INTEGER PRIMARY KEY,
   username TEXT UNIQUE NOT NULL CHECK (length(username) >= 1),
   pass TEXT NOT NULL, 
   sudo INTEGER
@@ -17,20 +17,25 @@ CREATE TABLE events (
 );
 
 CREATE TABLE concerts (
-  event_id TEXT NOT NULL PRIMARY KEY REFERENCES events(id),
+  event_id INTEGER PRIMARY KEY REFERENCES events(id),
   artist TEXT
 );
 
 CREATE TABLE games (
-  event_id TEXT NOT NULL PRIMARY KEY REFERENCES events(id),
+  event_id INTEGER NULL PRIMARY KEY REFERENCES events(id),
   team1 TEXT,
   team2 TEXT
 );
 
 CREATE TABLE tickets (
-  user_id INTEGER NOT NULL REFERENCES users(id),
-  event_id TEXT NOT NULL REFERENCES events(id),
+  user_id INTEGER REFERENCES users(id),
+  event_id INTEGER REFERENCES events(id),
   seat TEXT,
   PRIMARY KEY (event_id, seat)
 );
 
+CREATE TABLE user_events ( 
+  user_id INTEGER REFERENCES users(id),
+  event_id INTEGER REFERENCES events(id),
+  PRIMARY KEY (user_id, event_id)
+)

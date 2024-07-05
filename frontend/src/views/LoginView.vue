@@ -4,14 +4,14 @@
   const password = ref("");
   const API = import.meta.env.VITE_API;
   
-  function restrict(_) { 
+  function restrict(_: any) { 
     fetch(`/api/restricted`, {
       method: "GET",
       credentials: "include", // drop when same origin
     }
     )
   }
-  function handleLogin(_) {
+  function handleLogin(_: any) {
     const formData = new FormData();
     if (!username.value || !password.value)
       return;

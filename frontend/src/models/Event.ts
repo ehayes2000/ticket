@@ -5,7 +5,7 @@ export enum EventKind {
   Game = "Game"
 }
 
-export interface TicketableEvent { 
+export interface BaseEvent { 
   name: string
   description: string
   venue: Venue
@@ -14,11 +14,11 @@ export interface TicketableEvent {
   kind: EventKind
 }
 
-export interface Concert extends TicketableEvent { 
+export interface Concert extends BaseEvent { 
   artist: string
 }
 
-export interface Game extends TicketableEvent {  
+export interface Game extends BaseEvent {  
   team1: string
   team2: string
 }
