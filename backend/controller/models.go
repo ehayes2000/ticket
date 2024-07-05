@@ -24,16 +24,16 @@ func (e BaseEvent) GetEventKind() string { return e.Kind }
 
 type Concert struct {
 	BaseEvent
-	artist string
+	Artist string
 }
 
 type Game struct {
 	BaseEvent
-	team1 string
-	team2 string
+	Team1 string
+	Team2 string
 }
 
-type Ticket struct {
-	BaseEvent
-	seat string
+type Tickets struct {
+	Event Event
+	Seats []string
 }

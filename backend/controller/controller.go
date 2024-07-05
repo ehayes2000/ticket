@@ -5,12 +5,14 @@ type Controller interface {
 	CreateSuperUser(username string, password string) error
 	CreateUser(username string, password string) error
 	DeleteUser(username string) error
+	IsSuperUser(username string) (bool, error)
 	// login
 	LoginUser(username string, password string) (bool, error)
 	// tickets
-	GetTickets(username string) ([]Ticket, error)
-	AddTickets(username string, tickets []Ticket) (int, error)
-	RemoveTickets(ticketNames []string) (int, error)
+	GetTickets(username string, eventName string) (Tickets, error)
+	AddTickets(username string, tickets Tickets) (int, error)
+	RemoveTickets(username string, tickets Tickets) (int, error)
+	GetAllUserTIckets(username string) (Tickets, error)
 	// events
 	CreateEvent(Event) error
 	DeleteEvent(name string) error
