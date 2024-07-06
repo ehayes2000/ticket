@@ -2,13 +2,14 @@ package main
 
 import (
 	ctrl "backend/controller"
+	sqlite "backend/controller/sqlite"
 	"fmt"
 	"time"
 )
 
 func InsertRows() {
 	fmt.Println("we do a bit of inserting")
-	controller, err := ctrl.NewSqliteController("db.db")
+	controller, err := sqlite.NewSqliteController("db.db")
 	if err != nil {
 		fmt.Println("broke")
 		return

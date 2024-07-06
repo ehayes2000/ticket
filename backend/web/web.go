@@ -6,12 +6,13 @@ import (
 	"net/http"
 
 	ctrl "backend/controller"
+	sqlite "backend/controller/sqlite"
 
 	"github.com/labstack/echo/v4"
 )
 
 func MakeServer() *echo.Echo {
-	controller, err := ctrl.NewSqliteController("db.db")
+	controller, err := sqlite.NewSqliteController("db.db")
 	if err != nil {
 		fmt.Errorf("no db connection")
 	}
@@ -24,7 +25,7 @@ func MakeServer() *echo.Echo {
 	unrestrictedRoutes.GET("/getEvents", func(c echo.Context) error {
 		return GetEvents(c, controller)
 	})
-	AttachAuthRoutes(restrictedRoutes, unrestrictedRoutes)
+	AttachAuthRoutes(restrictedRoutes, unrestrictedRoutes, controller)
 	return server
 }
 
