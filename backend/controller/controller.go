@@ -20,4 +20,5 @@ type Controller interface {
 	GetAllEvents() ([]Event, error)
 	SaveUserEvent(eventId int, userId int) error
 	GetSavedEvents(userId int) ([]Event, error)
+	UnsaveUserEvent(eventId int, userId int) error
 }

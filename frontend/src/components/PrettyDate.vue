@@ -9,27 +9,36 @@
 
 <template>
   <div class="date-wrapper">
-    <div class="pretty-date">
-      <div class="month"> {{ month }} </div>
-      <div class="day"> {{ day }} </div>
+    <div class="bg">
+      <div class="pretty-date">
+        <div class="month"> {{ month }} </div>
+        <div class="day"> {{ day }} </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-  .date-wrapper { 
+  .bg { 
+    width: 100%;
+    height: 100%;
+    background-color: blue;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
+    border-radius: .2rem;
+  }
+
+  .date-wrapper { 
+    padding: .75rem;
   }
   .day { 
     font-weight: bold;
   }
   .pretty-date {
-    background-color: blue;
     color: white;
-    padding: 0 .5rem 0 .5rem;;
     border-radius: .1rem;
   }
 </style>

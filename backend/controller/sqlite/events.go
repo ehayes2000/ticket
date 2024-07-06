@@ -154,6 +154,21 @@ func (s Sqlite) GetAllEvents() ([]ctrl.Event, error) {
 	return events, nil
 }
 
+func (s Sqlite) UnsaveUserEvent(eventId int, userId int) error {
+	delete := "DELETE FROM user_events WHERE user_id=? AND event_id=?;"
+	ctx := context.TODO()
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, exErr := tx.Exec(delete, userId, eventId)
+	if exErr != nil {
+		return exErr
+	}
+	return tx.Commit()
+}
+
 func (s Sqlite) SaveUserEvent(eventId int, userId int) error {
 	insert := "INSERT INTO user_events (user_id, event_id) VALUES (?, ?)"
 	ctx := context.TODO()

@@ -11,7 +11,7 @@
 
 <template>
   <div class="event">
-    <PrettyDate :date="props.event.date"/>
+      <PrettyDate :date="props.event.date"/>
     <div class="details"> 
       <div class="header">
         <h1> {{ props.event.name }} </h1>
@@ -20,6 +20,7 @@
       <div class="more-details"> {{ props.event.venue }} </div>
       <div class="more-details"> {{ props.event.description }} </div>
     </div>
+
     <slot>
     </slot>
   </div>
@@ -27,8 +28,9 @@
 
 <style scoped>
   .event { 
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    justify-content: justify-between;
     cursor: pointer;
   }
 
@@ -41,9 +43,10 @@
     padding: .5rem;
   }
   .more-details { 
-    max-width: 150px;
+    max-width: 4fr;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
 </style>

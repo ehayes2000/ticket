@@ -6,8 +6,9 @@
     type Game, 
   } from "@/models/Event";
   import { getMyEvents } from "@/store/myEvents"
-  import EventListItem from "@/components/EventItem.vue";
-
+  import EventItem from "@/components/EventItem.vue";
+  import UnsaveButton from "@/components/UnsaveButton.vue";
+  import BuyTicketsButton from "@/components/BuyTicketsButton.vue";
   
   const loading = ref(true);
   const mySavedEvents = ref<(Concert | Game)[]>([]);
@@ -21,8 +22,14 @@
     }
   })
 
+  const removeEvent = (id: number) => { 
+    console.log("filter for id", id)
+    mySavedEvents.value = mySavedEvents.value.filter(e => {
+      return e.id != id;
+    })  
+  }
+  
   getMyEvents().then(e => {
-    
     mySavedEvents.value = e
   })
 
@@ -32,7 +39,12 @@
   <div class="home-layout">
     <div class="my-items">
       <h1> Saved Events </h1>
-      <EventListItem v-for="e in mySavedEvents" :event="e" />
+      <EventItem class="fade-out" v-for="e in mySavedEvents" :event="e">
+        <div class="event-controls">
+          <BuyTicketsButton :eventId="e.id"/>
+          <UnsaveButton @click="()=>removeEvent(e.id)" :eventId="e.id" />
+        </div>
+      </EventItem>
     </div>
   </div>
 </template>
@@ -49,5 +61,12 @@
   .my-items { 
     outline: black solid 1px;  
     padding: 0 2rem 0 2rem ;
+  }
+  .event-controls { 
+    display: flex;
+    flex-direction: column;
+    padding: .5rem;
+    row-gap: .5rem;
+    justify-content: center;
   }
 </style>

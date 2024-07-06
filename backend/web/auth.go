@@ -45,6 +45,12 @@ func AttachAuthRoutes(restricted *echo.Group,
 			return saveEvent(c, controller)
 		},
 	)
+	restricted.POST("/unsaveEvent",
+		func(c echo.Context) error {
+			return unsaveEvent(c, controller)
+		},
+	)
+
 	restricted.GET("/getSavedEvents",
 		func(c echo.Context) error {
 			return getSavedEvents(c, controller)
@@ -147,6 +153,25 @@ func saveEvent(c echo.Context, controller ctrl.Controller) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 	return c.String(http.StatusOK, "event saved")
+}
+
+func unsaveEvent(c echo.Context, controller ctrl.Controller) error {
+	// TODO get UID from JWT
+	userId, ok := getUserIdJwt(c)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized)
+	}
+	eventId, idErr := strconv.Atoi(c.QueryParam("eventId"))
+	if idErr != nil {
+		fmt.Printf("failed to atoi %s", idErr)
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	saveErr := controller.UnsaveUserEvent(eventId, userId)
+	if saveErr != nil {
+		fmt.Printf("failed to save %s", saveErr)
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	return c.String(http.StatusOK, "event unsaved")
 }
 
 func getSavedEvents(c echo.Context, controller ctrl.Controller) error {

@@ -17,7 +17,7 @@
 <template>   
   <div class="event-list-wrapper">
     <div class="event-list">
-      <EventItem v-for="e in events" :key="e.id" :event="e">
+      <EventItem v-for="e in events" class="item" :key="e.id" :event="e">
         <div class="event-controls">
           <BuyTicketsButton :eventId="e.id"/>
           <SaveButton :eventId="e.id"/>
@@ -43,4 +43,18 @@
     row-gap: .5rem;
     padding: .5rem;
   }
+  .item {
+  padding: 10px 0;
+  position: relative;
+}
+
+.item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #e0e0e0;
+}
 </style>
