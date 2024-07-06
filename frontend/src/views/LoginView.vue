@@ -1,9 +1,11 @@
 <script setup lang="ts"> 
+  import { useAuth } from "@/store/login"
   import { ref } from "vue";
   const username = ref("")
   const password = ref("");
-  const API = import.meta.env.VITE_API;
   
+  const { isLoggedIn, login, logout } = useAuth();
+
   function createAccount(_:any){
     const formData = new FormData();
     if (!username.value || !password.value)
@@ -18,6 +20,7 @@
       console.log("resp,", response);
       if (!response.ok)
         throw new Error(`HTTP Error ${response.status}`);
+      login();
     })
     .catch(e => {
       console.error("Request failed with error:", e);
@@ -37,6 +40,7 @@
       console.log("resp,", response);
       if (!response.ok)
         throw new Error(`HTTP Error ${response.status}`);
+      login();
     })
     .catch(e => {
       console.error("Request failed with error:", e);
@@ -54,18 +58,68 @@
     .catch(e => {
       console.error("Request failed with error:", e);
     });
-    
   }
 </script>
 
 <template> 
-  <div>
-    <input type="text" v-model="username"/>
-    <input type="password" v-model="password"/>
-    <button @click="handleLogin"> Login </button>
-    <button @click="createAccount"> Create Account</button>
-    <button @click="saveEvent"> TEST </button>
-
-    
+  <div class="wrapper"> 
+    <div v-if="isLoggedIn">
+      <button @click="logout"> Logout </button>
+    </div>
+    <div v-else class="login-view">
+      <div class="header">
+        <h1> Create an Account </h1>  
+        or
+        <h1> Login </h1>
+      </div> 
+      <input type="text" v-model="username" placeholder="Username"/>
+      <input type="password" v-model="password" placeholder="Password"/>
+      <div class="controls">
+        <button @click="handleLogin"> Login </button>
+        <button @click="createAccount"> Create Account</button>
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped> 
+  button {
+    color: blue;
+    background: none;
+    border: solid blue 1px;
+    border-radius: .2rem;
+    padding: 0 1rem 0 1rem;
+    margin: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: none;
+    transition: 0.14s ease;
+  }
+
+  button:hover { 
+    color: white;
+    background-color: blue;
+  }
+
+  .header { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .controls { 
+    display: flex;
+    justify-content: space-between;
+    column-gap: 1rem;
+  }
+  .wrapper { 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-view { 
+    display: flex;
+    flex-direction: column;     
+    row-gap: .5rem;
+  }
+
+</style>

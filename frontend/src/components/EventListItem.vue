@@ -1,42 +1,50 @@
 <script setup lang="ts">
   import { formatDate } from "@/util/formatDate";
-  import { type BaseEvent } from "@/models/Event";
+  import { type Game, type Concert} from "@/models/Event";
+  import PrettyDate from "@/components/PrettyDate.vue";
+  import EventTag from "@/components/EventTag.vue";
+
   const props = defineProps<{
-    event: BaseEvent
+    event: Game | Concert
   }>();
   const event = props.event
 </script>
 
 <template>
   <div class="event">
-    <h1>{{ event.name }}</h1>
-    <div>
-    <div class="event-info">
-      <h2> {{ event.venue }} </h2>
-      <h2> {{ formatDate(event.date) }} </h2>
-      <h2 :class="['event-kind', event.kind]"> {{ event.kind }}</h2>
+    <PrettyDate :date="props.event.date"/>
+    <div class="details"> 
+      <div class="header">
+        <h1> {{ props.event.name }} </h1>
+        <h> <EventTag :kind="props.event.kind" /> </h>
+      </div>
+      <div class="more-details"> {{ props.event.venue }} </div>
+      <div class="more-details"> {{ props.event.description }} </div>
+      <div>
+      </div>
     </div>
-    </div>
-    <body> {{ event.description }}</body>
   </div>
 </template>
 
 <style scoped>
   .event { 
     display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    padding: 1rem;
-  }
-
-  .event-info { 
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
     flex-direction: row;
+    cursor: pointer;
   }
 
-  .event-kind { 
-    text-align: right;
-  }
+  .header { 
+    display: flex;
+    column-gap: .3rem;
 
+  }
+  .details {
+    padding: .5rem;
+  }
+  .more-details { 
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 </style>

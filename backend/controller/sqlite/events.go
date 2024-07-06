@@ -155,11 +155,84 @@ func (s Sqlite) GetAllEvents() ([]ctrl.Event, error) {
 }
 
 func (s Sqlite) SaveUserEvent(eventId int, userId int) error {
-	return nil
+	insert := "INSERT INTO user_events (user_id, event_id) VALUES (?, ?)"
+	ctx := context.TODO()
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, exErr := tx.Exec(insert, userId, eventId)
+	if exErr != nil {
+		return exErr
+	}
+	return tx.Commit()
 }
 
 func (s Sqlite) GetSavedEvents(userId int) ([]ctrl.Event, error) {
-	return nil, nil
+	get := `SELECT e.id, e.name, e.description, e.venue, e.date, e.kind, c.artist, g.team1, g.team2 FROM events e
+	INNER JOIN user_events u ON e.id=u.event_id
+	LEFT JOIN games g ON e.id=g.event_id
+	LEFT JOIN concerts c ON e.id=c.event_id
+	WHERE u.user_id = ?`
+
+	type anyEvent struct {
+		id          int
+		name        string
+		description string
+		venue       string
+		date        string
+		kind        string
+		artist      string
+		team1       string
+		team2       string
+	}
+	var savedEvents []ctrl.Event
+	rows, err := s.db.Query(get, userId)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var e anyEvent
+		rows.Scan(
+			&e.id,
+			&e.name,
+			&e.description,
+			&e.venue,
+			&e.date,
+			&e.kind,
+			&e.artist,
+			&e.team1,
+			&e.team2,
+		)
+		parsedDate, parseErr := time.Parse(DateFormat, e.date)
+		if parseErr != nil {
+			return nil, parseErr
+		}
+		base := ctrl.BaseEvent{
+			Id:          e.id,
+			Kind:        e.kind,
+			Name:        e.name,
+			Description: e.description,
+			Venue:       e.venue,
+			Date:        parsedDate,
+		}
+		if e.kind == ctrl.GAME {
+			savedEvents = append(savedEvents, ctrl.Game{
+				BaseEvent: base,
+				Team1:     e.team1,
+				Team2:     e.team2,
+			})
+		} else if e.kind == ctrl.CONCERT {
+			savedEvents = append(savedEvents, ctrl.Concert{
+				BaseEvent: base,
+				Artist:    e.artist,
+			})
+		} else {
+			return nil, fmt.Errorf("unknown event kind %s", e.kind)
+		}
+	}
+	return savedEvents, nil
 }
 
 func insertBaseEvent(event ctrl.BaseEvent, transaction *sql.Tx, c context.Context) (int64, error) {

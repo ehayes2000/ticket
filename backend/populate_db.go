@@ -26,4 +26,6 @@ func InsertRows() {
 		Team2: "Godzilla",
 	}
 	controller.CreateEvent(game)
+	controller.CreateEvent(game)
+	controller.CreateEvent(game)
 }

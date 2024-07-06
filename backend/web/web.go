@@ -34,7 +34,6 @@ func Ping() {
 }
 
 func GetEvents(c echo.Context, controller ctrl.Controller) error {
-	fmt.Println("give me the data")
 	events, err := controller.GetAllEvents()
 	if err != nil {
 		fmt.Println(err)

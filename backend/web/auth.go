@@ -4,8 +4,10 @@ Configure routes requiring authorization and JWT authorization middleware
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	ctrl "backend/controller"
@@ -41,6 +43,11 @@ func AttachAuthRoutes(restricted *echo.Group,
 	restricted.POST("/saveEvent",
 		func(c echo.Context) error {
 			return saveEvent(c, controller)
+		},
+	)
+	restricted.GET("/getSavedEvents",
+		func(c echo.Context) error {
+			return getSavedEvents(c, controller)
 		},
 	)
 }
@@ -106,18 +113,55 @@ func createAccountRoute(c echo.Context, controller ctrl.Controller) error {
 	return c.String(http.StatusOK, "Account Creation successful")
 }
 
-func saveEvent(c echo.Context, controller ctrl.Controller) error {
-	fmt.Println("SAVE EVENT\n")
-	// TODO get UID from JWT
+func getUserIdJwt(c echo.Context) (int, bool) {
 	token, ok := c.Get("user").(*jwt.Token)
 	if !ok {
-		fmt.Println("GET TOKEN")
-		return echo.NewHTTPError(http.StatusUnauthorized)
+		return -1, false
 	}
 	subj, err := token.Claims.GetSubject()
 	if err != nil {
-		fmt.Printf("ERROR %s\n", err)
+		return -1, false
 	}
-	fmt.Printf("USER ID: %s\n", subj)
-	return nil
+
+	id, convErr := strconv.Atoi(subj)
+	if convErr != nil {
+		return -1, false
+	}
+	return id, true
+}
+
+func saveEvent(c echo.Context, controller ctrl.Controller) error {
+	// TODO get UID from JWT
+	userId, ok := getUserIdJwt(c)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized)
+	}
+	eventId, idErr := strconv.Atoi(c.QueryParam("eventId"))
+	if idErr != nil {
+		fmt.Printf("failed to atoi %s", idErr)
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	saveErr := controller.SaveUserEvent(eventId, userId)
+	if saveErr != nil {
+		fmt.Printf("failed to save %s", saveErr)
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	return c.String(http.StatusOK, "event saved")
+}
+
+func getSavedEvents(c echo.Context, controller ctrl.Controller) error {
+	userId, ok := getUserIdJwt(c)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized)
+	}
+	events, getErr := controller.GetSavedEvents(userId)
+	if getErr != nil {
+		fmt.Printf(":( %s", getErr)
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	serialized, sErr := json.Marshal(events)
+	if sErr != nil {
+		return echo.NewHTTPError(500, ":O")
+	}
+	return c.Blob(http.StatusOK, "application/json", serialized)
 }

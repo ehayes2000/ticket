@@ -1,11 +1,12 @@
 type Venue = string; // maybe more complex later
 
 export enum EventKind {
-  Concert = "Concert",
-  Game = "Game"
+  Concert = "CONCERT",
+  Game = "GAME"
 }
 
 export interface BaseEvent { 
+  id: number
   name: string
   description: string
   venue: Venue
