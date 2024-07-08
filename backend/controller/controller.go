@@ -13,6 +13,7 @@ type Controller interface {
 	AddTickets(tickets Tickets) (int, error)
 	RemoveTickets(tickets Tickets) (int, error)
 	GetAllUserTickets(userId int) (Tickets, error)
+	PrintAllUserTickets(userId int) ([]PrintableTickets, error)
 	// events
 	CreateEvent(Event) (int, error)
 	DeleteEvent(eventId int) error

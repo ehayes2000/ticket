@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
   import { ref, onMounted } from "vue";
   import {
@@ -35,38 +34,43 @@
 
 </script>
 
-<template>
-  <div class="home-layout">
-    <div class="my-items">
-      <h1> Saved Events </h1>
-      <EventItem class="fade-out" v-for="e in mySavedEvents" :event="e">
+<template>   
+    <div class="event-list">
+      <EventItem v-for="e in mySavedEvents" class="item" :key="e.id" :event="e">
         <div class="event-controls">
-          <BuyTicketsButton :eventId="e.id"/>
+          <BuyTicketsButton @click="$emit('getTickets', e.id)"  :eventId="e.id"/>
           <UnsaveButton @click="()=>removeEvent(e.id)" :eventId="e.id" />
-        </div>
+        </div> 
       </EventItem>
     </div>
-  </div>
 </template>
 
 <style scoped> 
-  h1 { 
-    color: blue
-  }
-  .home-layout {
-    display: flex;
+  .event-list {   
     justify-content: center;
-    column-gap: 4rem;
-  }
-  .my-items { 
-    outline: black solid 1px;  
-    padding: 0 2rem 0 2rem ;
   }
   .event-controls { 
     display: flex;
     flex-direction: column;
-    padding: .5rem;
-    row-gap: .5rem;
     justify-content: center;
+    align-content: center;
+    row-gap: .5rem;
+    padding-left: .5rem;
+    padding-right: .5rem;
   }
+
+.item {
+  padding: 10px 0;
+  position: relative;
+}
+
+.item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #e0e0e0;
+}
 </style>

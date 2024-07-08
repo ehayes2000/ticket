@@ -11,10 +11,10 @@ const formatKind = (k: string) => {
 
 const styleSwitcher = (k: EventKind) => {
   if (k === EventKind.Game) {
-    return "rgb(96, 165, 217)";
+    return "rgb(238, 99, 82)"
   }
   if (k === EventKind.Concert) {
-    return "rgb(96, 217, 156)";
+    return "rgb(91, 192, 190)";
   }
   return ""; // Default case
 };
@@ -30,7 +30,7 @@ const styleSwitcher = (k: EventKind) => {
   * { 
     color: white;
     font-style: italic;
-    font-size: 10px;
+    font-size: medium;
     display: inline-block;
     padding:  0 .3rem 0 .3rem;
   }

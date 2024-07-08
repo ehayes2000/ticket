@@ -23,6 +23,18 @@ func (s Sqlite) CreateEvent(event ctrl.Event) (int, error) {
 	}
 }
 
+type anyEvent struct {
+	id          int
+	name        string
+	description string
+	venue       string
+	date        string
+	kind        string
+	artist      *string
+	team1       *string
+	team2       *string
+}
+
 func (s Sqlite) DeleteEvent(eventId int) error {
 	delete := `DELETE FROM events WHERE id=?`
 	ctx := context.TODO()
@@ -112,44 +124,56 @@ func (s Sqlite) GetEvent(eventId int) (ctrl.Event, error) {
 	}
 }
 
-func (s Sqlite) GetAllGameEvents() ([]ctrl.Game, error) {
-	get := "SELECT e.id, kind, name, description, venue, date, team1, team2 FROM events e JOIN games g ON g.event_id=e.id"
-	var games []ctrl.Game
+func (s Sqlite) GetAllEvents() ([]ctrl.Event, error) {
+	get := `SELECT e.id, e.name, e.description, e.venue, e.date, e.kind, c.artist, g.team1, g.team2 FROM events e
+	LEFT JOIN games g ON e.id=g.event_id
+	LEFT JOIN concerts c ON e.id=c.event_id
+	ORDER BY e.date
+	`
+	var events []ctrl.Event
 	rows, err := s.db.Query(get)
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
-		game := ctrl.Game{}
-		var date string
+		var e anyEvent
 		rows.Scan(
-			&game.Id,
-			&game.Kind,
-			&game.Name,
-			&game.Description,
-			&game.Venue,
-			&date,
-			&game.Team1,
-			&game.Team2,
+			&e.id,
+			&e.name,
+			&e.description,
+			&e.venue,
+			&e.date,
+			&e.kind,
+			&e.artist,
+			&e.team1,
+			&e.team2,
 		)
-		game.Date, err = time.Parse(DateFormat, date)
-		if err != nil {
-			return nil, err
+		parsedDate, parseErr := time.Parse(DateFormat, e.date)
+		if parseErr != nil {
+			return nil, parseErr
 		}
-		games = append(games, game)
-	}
-	return games, nil
-}
-
-func (s Sqlite) GetAllEvents() ([]ctrl.Event, error) {
-	// TODO get concerts
-	games, err := s.GetAllGameEvents()
-	if err != nil {
-		return nil, err
-	}
-	events := make([]ctrl.Event, len(games))
-	for i, v := range games {
-		events[i] = v
+		base := ctrl.BaseEvent{
+			Id:          e.id,
+			Kind:        e.kind,
+			Name:        e.name,
+			Description: e.description,
+			Venue:       e.venue,
+			Date:        parsedDate,
+		}
+		if e.kind == ctrl.GAME {
+			events = append(events, ctrl.Game{
+				BaseEvent: base,
+				Team1:     *e.team1,
+				Team2:     *e.team2,
+			})
+		} else if e.kind == ctrl.CONCERT {
+			events = append(events, ctrl.Concert{
+				BaseEvent: base,
+				Artist:    *e.artist,
+			})
+		} else {
+			return nil, fmt.Errorf("unknown event kind %s", e.kind)
+		}
 	}
 	return events, nil
 }
@@ -189,19 +213,9 @@ func (s Sqlite) GetSavedEvents(userId int) ([]ctrl.Event, error) {
 	INNER JOIN user_events u ON e.id=u.event_id
 	LEFT JOIN games g ON e.id=g.event_id
 	LEFT JOIN concerts c ON e.id=c.event_id
-	WHERE u.user_id = ?`
+	WHERE u.user_id = ?
+	ORDER BY e.date`
 
-	type anyEvent struct {
-		id          int
-		name        string
-		description string
-		venue       string
-		date        string
-		kind        string
-		artist      string
-		team1       string
-		team2       string
-	}
 	var savedEvents []ctrl.Event
 	rows, err := s.db.Query(get, userId)
 	if err != nil {
@@ -235,13 +249,13 @@ func (s Sqlite) GetSavedEvents(userId int) ([]ctrl.Event, error) {
 		if e.kind == ctrl.GAME {
 			savedEvents = append(savedEvents, ctrl.Game{
 				BaseEvent: base,
-				Team1:     e.team1,
-				Team2:     e.team2,
+				Team1:     *e.team1,
+				Team2:     *e.team2,
 			})
 		} else if e.kind == ctrl.CONCERT {
 			savedEvents = append(savedEvents, ctrl.Concert{
 				BaseEvent: base,
-				Artist:    e.artist,
+				Artist:    *e.artist,
 			})
 		} else {
 			return nil, fmt.Errorf("unknown event kind %s", e.kind)

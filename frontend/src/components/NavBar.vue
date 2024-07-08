@@ -5,9 +5,9 @@
 <template>
   <div id="navBar">
     <div class="nav-group">
-      <RouterLink class="homeLink" to="/"> Tickets </RouterLink>
+      <RouterLink class="boldify" to="/events"> Events </RouterLink>
     <nav id="pages">
-      <RouterLink to="/events"> Events </RouterLink>
+      <RouterLink to="/myTickets"> My Tickets </RouterLink>
     </nav>
   </div>
     <div class="nav-group">
@@ -42,7 +42,7 @@
     column-gap: 2rem;
   }
 
-  .homeLink { 
+  .boldify { 
     font-weight:bold;
     font-size: 16
   }

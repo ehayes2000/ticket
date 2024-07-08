@@ -43,7 +43,8 @@
     row-gap: .5rem;
     padding: .5rem;
   }
-  .item {
+
+.item {
   padding: 10px 0;
   position: relative;
 }

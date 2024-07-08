@@ -6,6 +6,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
@@ -54,6 +55,16 @@ func AttachAuthRoutes(restricted *echo.Group,
 	restricted.GET("/getSavedEvents",
 		func(c echo.Context) error {
 			return getSavedEvents(c, controller)
+		},
+	)
+	restricted.POST("/buyTickets",
+		func(c echo.Context) error {
+			return buyTickets(c, controller)
+		},
+	)
+	restricted.GET("/getAllTickets",
+		func(c echo.Context) error {
+			return getTickets(c, controller)
 		},
 	)
 }
@@ -188,5 +199,57 @@ func getSavedEvents(c echo.Context, controller ctrl.Controller) error {
 	if sErr != nil {
 		return echo.NewHTTPError(500, ":O")
 	}
+	return c.Blob(http.StatusOK, "application/json", serialized)
+}
+
+func getSeats(n int) []string {
+	var seats []string
+	for range n {
+		number := rand.Intn(100) + 1
+		letter := rune(rand.Intn(26) + 'A')
+		seats = append(seats, fmt.Sprintf("%d%c", number, letter))
+	}
+	return seats
+}
+
+func buyTickets(c echo.Context, controller ctrl.Controller) error {
+	userId, ok := getUserIdJwt(c)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized)
+	}
+	eventId, idErr := strconv.Atoi(c.QueryParam("eventId"))
+	if idErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	nSeats, seatErr := strconv.Atoi(c.QueryParam("nSeats"))
+	if seatErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	tickets := ctrl.Tickets{
+		EventId: eventId,
+		UserId:  userId,
+		Seats:   getSeats(nSeats),
+	}
+	_, addErr := controller.AddTickets(tickets)
+	if addErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return c.String(http.StatusOK, "tickets added")
+}
+
+func getTickets(c echo.Context, controller ctrl.Controller) error {
+	userId, ok := getUserIdJwt(c)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized)
+	}
+	ticketss, err := controller.PrintAllUserTickets(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	serialized, sErr := json.Marshal(ticketss)
+	if sErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	fmt.Printf("outgoing: %s\n", serialized)
 	return c.Blob(http.StatusOK, "application/json", serialized)
 }

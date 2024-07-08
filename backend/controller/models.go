@@ -37,7 +37,12 @@ type Game struct {
 }
 
 type Tickets struct {
-	UserId  int      `json:"userId"`
-	EventId int      `json:"eventId"`
-	Seats   []string `json:"seats"`
+	UserId  int
+	EventId int
+	Seats   []string
+}
+
+type PrintableTickets struct {
+	Event Event    `json:"event"`
+	Seats []string `json:"seats"`
 }

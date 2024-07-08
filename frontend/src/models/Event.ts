@@ -5,6 +5,11 @@ export enum EventKind {
   Game = "GAME"
 }
 
+export interface Tickets  { 
+  event: (Game | Concert)
+  seats: Array<string>
+}
+
 export interface BaseEvent { 
   id: number
   name: string

@@ -3,7 +3,9 @@ package controller
 import (
 	ctrl "backend/controller"
 	"context"
+	"fmt"
 	"strings"
+	"time"
 )
 
 func (s Sqlite) GetTickets(userId int, eventId int) (ctrl.Tickets, error) {
@@ -104,4 +106,86 @@ func (s Sqlite) AddTickets(tickets ctrl.Tickets) (int, error) {
 		return 0, cErr
 	}
 	return int(n), nil
+}
+
+func (s Sqlite) PrintAllUserTickets(userId int) ([]ctrl.PrintableTickets, error) {
+	getSeats := "SELECT seat, event_id FROM tickets WHERE user_id=?" // get tickets
+	getEvents := `SELECT DISTINCT e.id, e.kind, e.name, e.description, e.venue, e.date, g.team1, g.team2, c.artist
+	FROM tickets t
+	LEFT JOIN events e ON t.event_id=e.id
+	LEFT JOIN concerts c ON e.id=c.event_id
+	LEFT JOIN games g ON e.id=g.event_id 
+	WHERE t.user_id=?
+	` // get events
+	seatss := make(map[int][]string)
+	rows, err := s.db.Query(getSeats, userId)
+	if err != nil {
+		return nil, err
+	}
+	var seat string
+	var eventId int
+
+	for rows.Next() {
+		rows.Scan(
+			&seat,
+			&eventId,
+		)
+		seatss[eventId] = append(seatss[eventId], seat)
+	}
+	var events []ctrl.Event
+	var e anyEvent
+	eventRows, eventErr := s.db.Query(getEvents, userId)
+	if eventErr != nil {
+		return nil, eventErr
+	}
+
+	for eventRows.Next() {
+		eventRows.Scan(
+			&e.id,
+			&e.kind,
+			&e.name,
+			&e.description,
+			&e.venue,
+			&e.date,
+			&e.team1,
+			&e.team2,
+			&e.artist,
+		)
+		fmt.Printf("READ FROM DB %+v\n", e)
+		date, dateErr := time.Parse(DateFormat, e.date)
+		if dateErr != nil {
+			return nil, dateErr
+		}
+		baseEvent := ctrl.BaseEvent{
+			Id:          e.id,
+			Kind:        e.kind,
+			Name:        e.name,
+			Description: e.description,
+			Venue:       e.venue,
+			Date:        date,
+		}
+		if baseEvent.Kind == ctrl.GAME {
+			events = append(events, ctrl.Game{
+				BaseEvent: baseEvent,
+				Team1:     *e.team1,
+				Team2:     *e.team2,
+			})
+		} else if baseEvent.Kind == ctrl.CONCERT {
+			events = append(events, ctrl.Concert{
+				BaseEvent: baseEvent,
+				Artist:    *e.artist,
+			})
+		} else {
+			return nil, fmt.Errorf("unexpected event kind %s", e.kind)
+		}
+	}
+	var pTickets []ctrl.PrintableTickets
+	for _, e := range events {
+		pTicket := ctrl.PrintableTickets{
+			Event: e,
+			Seats: seatss[e.GetEventId()],
+		}
+		pTickets = append(pTickets, pTicket)
+	}
+	return pTickets, nil
 }
