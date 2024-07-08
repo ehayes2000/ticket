@@ -96,9 +96,7 @@ Use vite reverse proxy (zulip to avoid cross origin)
 func loginRoute(c echo.Context, controller ctrl.Controller) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
-	fmt.Printf("LOGIN %s %s", username, password)
 	userId, loginErr := controller.LoginUser(username, password)
-	fmt.Printf("USER ID %d\n", userId)
 	if loginErr != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized)
 	}
@@ -113,12 +111,10 @@ func loginRoute(c echo.Context, controller ctrl.Controller) error {
 func createAccountRoute(c echo.Context, controller ctrl.Controller) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
-	fmt.Printf("CREATE ACCOUNT %s %s\n", username, password)
 	if len(username) < 7 || len(password) < 7 {
 		return echo.NewHTTPError(http.StatusForbidden, "credentials too short")
 	}
 	userId, makeErr := controller.CreateUser(username, password, false)
-	fmt.Printf("ACCOUNT CREATED %d\n", userId)
 	if makeErr != nil {
 		return echo.NewHTTPError(http.StatusForbidden)
 	}
@@ -250,6 +246,5 @@ func getTickets(c echo.Context, controller ctrl.Controller) error {
 	if sErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	fmt.Printf("outgoing: %s\n", serialized)
 	return c.Blob(http.StatusOK, "application/json", serialized)
 }

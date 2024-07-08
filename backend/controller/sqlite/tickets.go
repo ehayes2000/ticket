@@ -151,7 +151,6 @@ func (s Sqlite) PrintAllUserTickets(userId int) ([]ctrl.PrintableTickets, error)
 			&e.team2,
 			&e.artist,
 		)
-		fmt.Printf("READ FROM DB %+v\n", e)
 		date, dateErr := time.Parse(DateFormat, e.date)
 		if dateErr != nil {
 			return nil, dateErr

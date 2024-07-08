@@ -1,11 +1,28 @@
 
 <script setup lang="ts"> 
+  const emit = defineEmits(["ticketsBought"]);
+
   import IconBuyTickets from "@/components/icons/IconBuyTickets.vue"
   const props = defineProps<{
     eventId: number,
   }>();
 
-  function buyTickets() { 
+
+  const buyTickets = async (_: any) => { 
+    const good: boolean = await fetch(`/api/buyTickets?eventId=${props.eventId}&nSeats=1`, { 
+      method: "POST",
+      credentials: "same-origin",
+    }).then(response => { 
+      return response.ok;
+    })
+    .catch(e => { 
+      console.error("error buying tickets");
+      return false;
+    })
+    if (!good) { 
+      return;
+    }
+    emit("ticketsBought");
   }
 </script>
 

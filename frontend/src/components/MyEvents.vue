@@ -8,7 +8,8 @@
   import EventItem from "@/components/EventItem.vue";
   import UnsaveButton from "@/components/UnsaveButton.vue";
   import BuyTicketsButton from "@/components/BuyTicketsButton.vue";
-  
+
+  const emit = defineEmits(["ticketsBought"]);
   const loading = ref(true);
   const mySavedEvents = ref<(Concert | Game)[]>([]);
   onMounted(async () => { 
@@ -38,7 +39,7 @@
     <div class="event-list">
       <EventItem v-for="e in mySavedEvents" class="item" :key="e.id" :event="e">
         <div class="event-controls">
-          <BuyTicketsButton @click="$emit('getTickets', e.id)"  :eventId="e.id"/>
+          <BuyTicketsButton @ticketsBought="emit('ticketsBought')" :eventId="e.id"/>
           <UnsaveButton @click="()=>removeEvent(e.id)" :eventId="e.id" />
         </div> 
       </EventItem>

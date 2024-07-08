@@ -39,30 +39,14 @@
       myTicketss.value = newTicketss;
     }
   }
-  const buyTickets = async (eventId: number) => { 
-    const good: boolean = await fetch(`/api/buyTickets?eventId=${eventId}&nSeats=1`, { 
-      method: "POST",
-      credentials: "same-origin",
-    }).then(response => { 
-      return response.ok;
-    })
-    .catch(e => { 
-      console.error("error buying tickets");
-      return false;
-    })
-    if (!good) { 
-      return;
-    }
-    await fetchMyTickets();
-  }
-  console.log("TICS", myTicketss.value)
+
 </script>
 
 <template>
   <div class="wrapper">
     <div class="my-stuff">
       <h1> My Saved Events</h1>
-      <MyEvents @getTickets="buyTickets"/>
+      <MyEvents @ticketsBought="fetchMyTickets"/>
     </div>
     <div class="my-stuff">
       <h1> My Tickets </h1>
