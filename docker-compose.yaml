@@ -1,0 +1,9 @@
+services:
+  api: 
+    build: "backend"
+    image: "backend"
+  server:
+    build: "frontend"
+    image: "frontend"
+    ports:
+      - "80:80"
